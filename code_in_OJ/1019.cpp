@@ -48,12 +48,13 @@ int main()
          * dp[n][j] = value_n j >= weight_n
          */
         cout << dp[1][c] << endl;
-//        for(int i = 1; i <= n; ++i){
-//            for(int j = 1; j <= c; ++j){
-//                cout << dp[i][j] << " ";
-//            }
-//            cout << endl;
-//        }
+	// Another method use d[j]
+	int d[n+1];
+	d[0] = 0;// else d[j] could also init as 0.
+	for(int j = 1; j <= n; ++j){
+		d[j] = max(d[j-1], d[j-stone[j][0]] + stone[j][1]);
+	} 
+	cout << d[n] << endl;
         m--;
     }
     return 0;
