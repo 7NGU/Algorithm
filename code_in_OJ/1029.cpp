@@ -3,7 +3,6 @@
 
 using namespace std;
 
-int pre[15000];
 
 struct edge{
     int start;
@@ -11,23 +10,12 @@ struct edge{
     int len;
 };
 
-void init(int n){
-    for(int i = 0; i <= n; i++){
-        pre[i] = i;
-    }
+int min(int a, int b){
+    return a < b ? a : b;
 }
 
-int Find(int x){
-    int r = x;
-    while(pre[r] != r)
-        r = pre[r];
-    int i = x, j;
-    while(pre[i] != r){
-        j = pre[i];
-        pre[i] = j;
-        i = j;
-    }
-    return r;
+int max(int a, int b){
+    return a > b ? a : b;
 }
 
 void partition(edge *a, int begin, int end){
@@ -80,15 +68,26 @@ int main()
         // sort according to length of edge
         Quicksort(p, e);
 
-        // traverse and union
-        /*
-         * 每个节点自身是一个树
-         * 遍历边集（剔除重复边集合）判断加入该边后点集是否成环
-         * 遍历结束判断是否构建成功
-         */
+        // traverse
+        int node[1000] = {0}; // use to record the node
+        int minv = 0;
+        for(int i = 0; i < e; ++i){
+            if(node[p[i].start] == 0 || node[p[i].end] == 0){// 之前没有加入过
+                if(!(node[p[i].start] != 0 && node[p[i].end] != 0)){// 剔除重复的边
+                    node[p[i].start]++;
+                    node[p[i].end]++;
+                    minv += p[i].len;
+                }
+            }
+        }
 
         //对是否成功构建最小生成树进行判断
-
+        int jud = 0;
+        for(int i = 0; i < 1000; ++i){
+            if(node[i] != 0) jud++;
+        }
+        if(jud < n) cout << -1 << endl;
+        else cout << minv << endl;
 
 //        for(int i = 0; i < e; ++i){
 //            cout << p[i].start << p[i].end << p[i].len << " ";
