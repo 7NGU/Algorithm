@@ -1,48 +1,25 @@
 #include <iostream>
-#include <cstring>
-
+#include <algorithm>
 using namespace std;
 
-
 struct edge{
-    int start;
-    int end;
+    int x;
+    int y;
     int len;
 };
+edge p[20005];
+int g[505];
+int node[505];
 
-int min(int a, int b){
-    return a < b ? a : b;
+bool cmp(edge a, edge b){
+    return a.len  < b.len;
 }
 
-int max(int a, int b){
-    return a > b ? a : b;
-}
-
-void partition(edge *a, int begin, int end){
-    if(begin >= end)//递归终止条件
-        return;
-    //找到基准值的排好序位置p
-
-    int p = begin;
-
-    for(int i = begin+1; i <= end; i++){
-        if(a[i].len < a[begin].len){//将比基准元素小的元素交换排列到基准元素的后面，基准元素是第一个
-            edge temp = a[p+1];
-            a[p+1] = a[i];
-            a[i] = temp;
-            p++;
-        }
+int ufind(int x){
+    if(g[x] == x){
+        return x;
     }
-    edge temp = a[begin];
-    a[begin] = a[p]; a[p] = temp;
-
-    //递归调用
-    partition(a, begin, p-1);
-    partition(a, p+1, end);
-}
-
-void Quicksort(edge *a, int size){
-    partition(a, 0, size-1);
+    return g[x] = ufind(g[x]);
 }
 
 
@@ -54,10 +31,8 @@ int main()
     while(m > 0){
         int n, e;
         cin >> n >> e;
-        edge p[e];
-        memset(&p, 0, sizeof(edge)*e);
-        for(int i = 0; i < e; ++i){
-            cin >> p[i].start >> p[i].end >> p[i].len;
+        for(int i = 1; i <= e; ++i){
+            cin >> p[i].x >> p[i].y >> p[i].len;
         }
         /*
          * 首先对len进行从小到大的排序
@@ -66,33 +41,38 @@ int main()
          * ps:对节点是否属于同一个集合的判断可以用并查集进行优化
          */
         // sort according to length of edge
-        Quicksort(p, e);
+        sort(p+1, p+1+e, cmp);
 
-        // traverse
-        int node[1000] = {0}; // use to record the node
-        int minv = 0;
-        for(int i = 0; i < e; ++i){
-            if(node[p[i].start] == 0 || node[p[i].end] == 0){// 之前没有加入过
-                if(!(node[p[i].start] != 0 && node[p[i].end] != 0)){// 剔除重复的边
-                    node[p[i].start]++;
-                    node[p[i].end]++;
-                    minv += p[i].len;
-                }
-            }
+        for(int i = 1; i <= n; ++i){
+            g[i] = i;
+            node[i] = 0;
         }
 
-        //对是否成功构建最小生成树进行判断
-        int jud = 0;
-        for(int i = 0; i < 1000; ++i){
-            if(node[i] != 0) jud++;
-        }
-        if(jud < n) cout << -1 << endl;
-        else cout << minv << endl;
-
-//        for(int i = 0; i < e; ++i){
-//            cout << p[i].start << p[i].end << p[i].len << " ";
+        int tot = 0, dis = 0;
+//        for(int i = 1; i <= n; ++i){
+//            cout << node[i] << " ";
 //        }
 //        cout << endl;
+
+        for(int i = 1; i <= e && tot < n - 1; ++i){
+            int gx = ufind(p[i].x);
+            int gy = ufind(p[i].y);
+            if(gx != gy){
+                g[gx] = g[gy];
+                tot++;
+                dis += p[i].len;
+                node[p[i].x] = 1;
+                node[p[i].y] = 1;
+            }
+        }
+        for(int i = 1; i <= n; ++i){
+            if(node[i] == 0){
+                dis = -1;
+                break;
+            }
+        }
+        cout << dis << endl;
+
 
         m--;
     }
